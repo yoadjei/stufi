@@ -1,6 +1,5 @@
 // database connection setup
 // uses postgres via drizzle ORM — needs DATABASE_URL env var
-// if not set, we still let the server start so the frontend works in dev
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
