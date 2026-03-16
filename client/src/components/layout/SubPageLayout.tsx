@@ -1,0 +1,47 @@
+import { useLocation } from "wouter";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect, type ReactNode } from "react";
+
+interface SubPageLayoutProps {
+  children: ReactNode;
+  title: string;
+  backPath?: string;
+  rightAction?: ReactNode;
+}
+
+export function SubPageLayout({ children, title, backPath, rightAction }: SubPageLayoutProps) {
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    document.title = `${title} | StuFi`;
+  }, [title]);
+
+  const handleBack = () => {
+    if (backPath) {
+      setLocation(backPath);
+    } else {
+      window.history.back();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="sticky top-0 bg-white border-b border-gray-200 z-40">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-lg font-semibold flex-1 text-center">{title}</h1>
+          <div className="w-9">{rightAction}</div>
+        </div>
+      </header>
+      <main className="flex-1 overflow-auto">{children}</main>
+    </div>
+  );
+}
