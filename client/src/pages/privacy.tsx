@@ -2,7 +2,8 @@ import { Link } from "wouter";
 import { ChevronLeft, Shield, Lock, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { SubPageLayout } from "@/components/layout/SubPageLayout";
+import { useAuth } from "@/lib/auth";
 
 const highlights = [
   {
@@ -82,18 +83,11 @@ You can manage cookie preferences in your browser settings.`,
 ];
 
 export default function PrivacyPage() {
-  return (
-    <AppLayout>
-      <div className="max-w-lg mx-auto px-5 py-6">
-        <header className="flex items-center gap-4 mb-6">
-          <Link href="/more">
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <h1 className="text-lg font-semibold">Privacy Policy</h1>
-        </header>
+  const { isAuthenticated } = useAuth();
 
+  return (
+    <SubPageLayout title="Privacy Policy" backPath={isAuthenticated ? "/more" : "/login"}>
+      <div className="max-w-lg mx-auto px-5 py-6">
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-4">
             <Shield className="w-8 h-8 text-white" />
@@ -153,6 +147,6 @@ export default function PrivacyPage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </SubPageLayout>
   );
 }
