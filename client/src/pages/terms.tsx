@@ -2,7 +2,8 @@ import { Link } from "wouter";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { SubPageLayout } from "@/components/layout/SubPageLayout";
+import { useAuth } from "@/lib/auth";
 
 const sections = [
   {
@@ -52,18 +53,11 @@ We will notify users of significant changes via email or in-app notification.`,
 ];
 
 export default function TermsPage() {
-  return (
-    <AppLayout>
-      <div className="max-w-lg mx-auto px-5 py-6">
-        <header className="flex items-center gap-4 mb-6">
-          <Link href="/more">
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <h1 className="text-lg font-semibold">Terms and Conditions</h1>
-        </header>
+  const { isAuthenticated } = useAuth();
 
+  return (
+    <SubPageLayout title="Terms and Conditions" backPath={isAuthenticated ? "/more" : "/login"}>
+      <div className="max-w-lg mx-auto px-5 py-6">
         <Card className="border-0 shadow-sm mb-4 bg-primary/5">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">
@@ -94,6 +88,6 @@ export default function TermsPage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </SubPageLayout>
   );
 }
