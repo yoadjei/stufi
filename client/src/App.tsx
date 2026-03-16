@@ -69,8 +69,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function PublicRoute({ children }: { children: React.ReactNode }) {
+function PublicRoute({ children, isLanding = false }: { children: React.ReactNode, isLanding?: boolean }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -78,6 +79,17 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isAuthenticated) {
     return <Redirect to="/" />;
+  }
+
+  // Bypassing landing page logic 
+  if (isLanding) {
+    const hasSeenLanding = localStorage.getItem("hasSeenLanding");
+    if (hasSeenLanding === "true") {
+      setTimeout(() => setLocation("/login"), 0); // Need to use setLocation or Redirect inside an effect or render body 
+      return null;
+    } else {
+      localStorage.setItem("hasSeenLanding", "true");
+    }
   }
 
   return <>{children}</>;
@@ -88,7 +100,7 @@ function Router() {
     <Switch>
       {/* public pages */}
       <Route path="/landing">
-        <PublicRoute><LandingPage /></PublicRoute>
+        <PublicRoute isLanding><LandingPage /></PublicRoute>
       </Route>
       <Route path="/onboarding">
         <PublicRoute><OnboardingPage /></PublicRoute>
