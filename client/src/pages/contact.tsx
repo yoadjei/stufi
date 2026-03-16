@@ -6,8 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { SubPageLayout } from "@/components/layout/SubPageLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 const contactMethods = [
   {
@@ -35,6 +36,7 @@ const contactMethods = [
 
 export default function ContactPage() {
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -71,17 +73,8 @@ export default function ContactPage() {
   };
 
   return (
-    <AppLayout>
+    <SubPageLayout title="Contact Us" backPath={isAuthenticated ? "/more" : "/login"}>
       <div className="max-w-lg mx-auto px-5 py-6">
-        <header className="flex items-center gap-4 mb-6">
-          <Link href="/more">
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <h1 className="text-lg font-semibold">Contact Us</h1>
-        </header>
-
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center mx-auto mb-4">
             <MessageCircle className="w-8 h-8 text-white" />
@@ -172,6 +165,6 @@ export default function ContactPage() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>
+    </SubPageLayout>
   );
 }
