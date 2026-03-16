@@ -89,18 +89,18 @@ export default function MorePage() {
   return (
     <AppLayout>
       <div className="flex flex-col min-h-screen">
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 affinity-gradient-hero" />
-          <div className="absolute top-4 right-0 w-40 h-40 bg-orange-400/40 rounded-full blur-2xl" />
-          <div className="absolute top-20 right-10 w-28 h-28 bg-yellow-400/50 rounded-full blur-xl" />
+        <div className="relative overflow-hidden bg-primary/5">
+          <div className="absolute inset-0 stufi-gradient-hero opacity-30" />
+          <div className="absolute top-4 right-0 w-48 h-48 bg-cyan-500/30 rounded-full blur-3xl" />
+          <div className="absolute top-10 right-10 w-32 h-32 bg-blue-500/40 rounded-full blur-2xl" />
 
           <div className="relative z-10 px-5 pt-8 pb-16 flex flex-col items-center">
             <div className="relative mb-4">
-              <Avatar className="w-24 h-24 border-4 border-white/20">
-                <AvatarFallback className="bg-white text-primary text-2xl font-bold">
+              <div className="w-24 h-24 rounded-full border-4 border-white shadow-md bg-white flex items-center justify-center">
+                <span className="text-primary text-3xl font-bold">
                   {initials}
-                </AvatarFallback>
-              </Avatar>
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -167,14 +167,7 @@ export default function MorePage() {
             </Card>
 
             <div className="flex flex-col items-center mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                  </svg>
-                </div>
-                <span className="font-semibold">StuFi</span>
-              </div>
+              <span className="font-semibold text-lg mb-1">StuFi</span>
               <p className="text-xs text-muted-foreground">Version 1.0.0</p>
             </div>
 
