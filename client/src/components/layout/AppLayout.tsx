@@ -76,10 +76,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* user + logout */}
         <div className="p-3 border-t border-white/10">
           <div className="flex items-center gap-3 px-3 py-2 text-sm text-white/70">
-            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold text-white">
-              {firstName.charAt(0).toUpperCase()}
-            </div>
-            <span className="flex-1 truncate">{firstName}</span>
+            <Link href="/more" className="flex items-center gap-3 flex-1 hover:text-white transition-colors cursor-pointer group">
+              <div className="w-8 h-8 rounded-full bg-white/15 group-hover:bg-white/20 transition-colors flex items-center justify-center text-xs font-bold text-white">
+                {firstName.charAt(0).toUpperCase()}
+              </div>
+              <span className="flex-1 truncate group-hover:underline cursor-pointer">{firstName}</span>
+            </Link>
             <button
               onClick={logout}
               className="text-white/40 hover:text-white transition-colors"
