@@ -1,5 +1,5 @@
-// auth pages layout — blue header, stufi branding
 import type { ReactNode } from "react";
+import { Link } from "wouter";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -32,9 +32,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
       <div className="bg-white py-4 text-center">
         <p className="text-xs text-muted-foreground">
-          <a href="/contact" className="hover:underline">Contact us</a>
+          <Link href="/contact" className="hover:underline text-muted-foreground">Contact us</Link>
           {" | "}
-          <a href="/terms" className="hover:underline">Terms and conditions</a>
+          <Link href="/terms" className="hover:underline text-muted-foreground">Terms and conditions</Link>
         </p>
       </div>
     </div>
