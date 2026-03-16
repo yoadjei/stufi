@@ -250,10 +250,6 @@ export default function LandingPage() {
                             </button>
                         </Link>
                     </div>
-
-                    <p className="mt-8 text-xs text-gray-400">
-                        Free forever · No bank link · 2 min setup
-                    </p>
                 </div>
             )}
         </div>
