@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { useAuth } from "@/lib/auth";
+import { apiBase } from "@/lib/api";
 import { Link } from "wouter";
 
 export default function OtpVerifyPage() {
@@ -43,7 +44,7 @@ export default function OtpVerifyPage() {
     if (otp.length !== 6) return;
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/otp/verify", {
+      const response = await fetch(`${apiBase}/api/auth/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -76,7 +77,7 @@ export default function OtpVerifyPage() {
     setCanResend(false);
     setResendTimer(60);
     try {
-      const response = await fetch("/api/auth/otp/start", {
+      const response = await fetch(`${apiBase}/api/auth/otp/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

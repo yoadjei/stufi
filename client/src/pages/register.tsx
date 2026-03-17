@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { useAuth } from "@/lib/auth";
+import { apiBase } from "@/lib/api";
 import { registerUserSchema } from "@shared/schema";
 import type { z } from "zod";
 
@@ -53,7 +54,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(`${apiBase}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

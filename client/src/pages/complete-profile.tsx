@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { apiBase } from "@/lib/api";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { useAuth } from "@/lib/auth";
 import { completeProfileSchema } from "@shared/schema";
@@ -38,11 +39,11 @@ export default function CompleteProfilePage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/profile", {
-        method: "PUT",
+      const response = await fetch(`${apiBase}/api/profile`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(data),
       });

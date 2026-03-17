@@ -16,6 +16,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { apiBase } from "@/lib/api";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { resetStartSchema } from "@shared/schema";
 import type { z } from "zod";
@@ -40,10 +41,11 @@ export default function ResetStartPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/reset/start", {
+      const { email } = data; // Destructure email from data
+      const response = await fetch(`${apiBase}/api/auth/reset/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ email }),
       });
       const result = await response.json();
       if (!response.ok) {

@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { apiBase } from "@/lib/api";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { otpStartSchema } from "@shared/schema";
 import type { z } from "zod";
@@ -35,7 +36,7 @@ export default function OtpStartPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/otp/start", {
+      const response = await fetch(`${apiBase}/api/auth/otp/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

@@ -3,6 +3,7 @@ import { Download, FileText, FileJson, Calendar } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { apiBase } from "@/lib/api";
 import {
   Select,
   SelectContent,
@@ -37,9 +38,11 @@ export default function ExportPage() {
 
     setIsDownloading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/export/${format}?cycleId=${selectedCycle}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(`${apiBase}/api/export/${format}?cycleId=${selectedCycle}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       if (!response.ok) {

@@ -19,6 +19,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
+import { apiBase } from "@/lib/api";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { resetFinishCodeSchema } from "@shared/schema";
 import type { z } from "zod";
@@ -60,7 +61,7 @@ export default function ResetFinishCodePage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/reset/finish", {
+      const response = await fetch(`${apiBase}/api/auth/reset/finish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

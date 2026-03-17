@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import type { User, Settings } from "@shared/schema";
+import { apiBase } from "@/lib/api";
 
 type AuthUser = User & { settings?: Settings };
 
@@ -36,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async (authToken: string) => {
     try {
-      const response = await fetch("/api/me", {
+      const response = await fetch(`${apiBase}/api/me`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (response.ok) {
