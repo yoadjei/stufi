@@ -69,7 +69,12 @@ export default function AddIncomePage() {
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/cycles/current"] });
       toast({ title: "Income Added", description: "Your income has been recorded." });
-      setLocation("/transact");
+      
+      if (window.history.length > 2) {
+        window.history.back();
+      } else {
+        setLocation("/transact");
+      }
     },
     onError: (error: Error) => {
       toast({

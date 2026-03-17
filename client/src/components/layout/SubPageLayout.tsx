@@ -18,10 +18,14 @@ export function SubPageLayout({ children, title, backPath, rightAction }: SubPag
   }, [title]);
 
   const handleBack = () => {
-    if (backPath) {
+    // If there is history (length > 2 usually means they've browsed in the app)
+    // we go back to exactly where they came from (e.g. Home screen)
+    if (window.history.length > 2) {
+      window.history.back();
+    } else if (backPath) {
       setLocation(backPath);
     } else {
-      window.history.back();
+      setLocation("/");
     }
   };
 

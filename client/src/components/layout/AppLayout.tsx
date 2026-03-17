@@ -98,7 +98,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 h-14 bg-white border-b border-gray-100 sticky top-0 z-30">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md overflow-hidden bg-white flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md overflow-hidden bg-white flex items-center justify-center">
               <img src="/icon.png" alt="StuFi Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-base font-bold text-gray-900">StuFi</span>

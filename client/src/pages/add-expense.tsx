@@ -69,7 +69,12 @@ export default function AddExpensePage() {
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/cycles/current"] });
       toast({ title: "Expense Added", description: "Your expense has been recorded." });
-      setLocation("/transact");
+      
+      if (window.history.length > 2) {
+        window.history.back();
+      } else {
+        setLocation("/transact");
+      }
     },
     onError: (error: Error) => {
       toast({

@@ -57,7 +57,12 @@ export default function NewCyclePage() {
       queryClient.invalidateQueries({ queryKey: ["/api/cycles/current"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics/summary"] });
       toast({ title: "Budget Created", description: "Your new budget period has started." });
-      setLocation("/cycles");
+      
+      if (window.history.length > 2) {
+        window.history.back();
+      } else {
+        setLocation("/cycles");
+      }
     },
     onError: (error: Error) => {
       toast({
