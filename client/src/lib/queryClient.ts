@@ -61,7 +61,12 @@ export const getQueryFn: <T>(options: {
         url = queryKey as unknown as string;
       }
 
-      const res = await fetch(url, { headers });
+      // Conditionally prepend the backend URL if we are running the frontend on Vercel
+      // (where VITE_API_URL is configured)
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const finalUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
+
+      const res = await fetch(finalUrl, { headers });
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
         return null;
