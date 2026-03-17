@@ -81,16 +81,7 @@ function PublicRoute({ children, isLanding = false }: { children: React.ReactNod
     return <Redirect to="/" />;
   }
 
-  // Bypassing landing page logic 
-  if (isLanding) {
-    const hasSeenLanding = localStorage.getItem("hasSeenLanding");
-    if (hasSeenLanding === "true") {
-      setTimeout(() => setLocation("/login"), 0); // Need to use setLocation or Redirect inside an effect or render body 
-      return null;
-    } else {
-      localStorage.setItem("hasSeenLanding", "true");
-    }
-  }
+  // Landing page always shows for unauthenticated users
 
   return <>{children}</>;
 }
