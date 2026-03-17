@@ -59,7 +59,8 @@ export default function ResetStartPage() {
       if (data.method === "code") {
         setLocation(`/reset/finish-code?email=${encodeURIComponent(data.email)}`);
       } else {
-        setLocation(`/reset/finish-link`);
+        // If they chose link, they just wait for the email.
+        setLocation(`/login`);
       }
     } catch (error) {
       toast({
