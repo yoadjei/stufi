@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   needsProfile: boolean;
-  login: (user: AuthUser, token: string, needsProfile?: boolean) => void;
+  login: (user: AuthUser, token: string, needsProfile?: boolean, rememberMe?: boolean) => void;
   logout: () => void;
   updateUser: (user: Partial<AuthUser>) => void;
   token: string | null;
@@ -26,7 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    // Check both storages — localStorage for "Remember Me" sessions, sessionStorage for non-persistent
+    const storedToken = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
       fetchUser(storedToken);
@@ -46,21 +47,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setNeedsProfile(!data.user.name);
       } else {
         localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
         setToken(null);
       }
     } catch {
       localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       setToken(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = (userData: AuthUser, authToken: string, profileNeeded = false) => {
+  const login = (userData: AuthUser, authToken: string, profileNeeded = false, rememberMe = true) => {
     setUser(userData);
     setToken(authToken);
     setNeedsProfile(profileNeeded);
-    localStorage.setItem("token", authToken);
+    if (rememberMe) {
+      localStorage.setItem("token", authToken);
+      sessionStorage.removeItem("token");
+    } else {
+      sessionStorage.setItem("token", authToken);
+      localStorage.removeItem("token");
+    }
   };
 
   const logout = () => {
@@ -68,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setNeedsProfile(false);
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setLocation("/login");
   };
 

@@ -76,7 +76,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* user + logout */}
         <div className="p-3 border-t border-white/10">
           <div className="flex items-center gap-3 px-3 py-2 text-sm text-white/70">
-            <Link href="/more" className="flex items-center gap-3 flex-1 hover:text-white transition-colors cursor-pointer group">
+            <Link href="/more/profile" className="flex items-center gap-3 flex-1 hover:text-white transition-colors cursor-pointer group" title="View profile">
               <div className="w-8 h-8 rounded-full bg-white/15 group-hover:bg-white/20 transition-colors flex items-center justify-center text-xs font-bold text-white">
                 {firstName.charAt(0).toUpperCase()}
               </div>

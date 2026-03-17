@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   InputOTP,
@@ -18,6 +18,7 @@ export default function OtpVerifyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
@@ -31,6 +32,7 @@ export default function OtpVerifyPage() {
     }
   }, [email, setLocation]);
 
+  // Countdown timer for resend
   useEffect(() => {
     if (resendTimer > 0) {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
@@ -53,7 +55,8 @@ export default function OtpVerifyPage() {
       if (!response.ok) {
         throw new Error(result.error?.message || "Verification failed");
       }
-      login(result.user, result.token, result.needsProfile);
+      // OTP sign-in always remembers the session (same as "remember me" checked)
+      login(result.user, result.token, result.needsProfile, true);
       toast({ title: "Welcome!", description: "Signed in successfully." });
       if (result.needsProfile) {
         setLocation("/complete-profile");
@@ -62,8 +65,8 @@ export default function OtpVerifyPage() {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Verification failed",
+        title: "Invalid Code",
+        description: error instanceof Error ? error.message : "The code is incorrect or has expired. Please try again.",
         variant: "destructive",
       });
       setOtp("");
@@ -73,7 +76,8 @@ export default function OtpVerifyPage() {
   };
 
   const handleResend = async () => {
-    if (!canResend) return;
+    if (!canResend || isResending) return;
+    setIsResending(true);
     setCanResend(false);
     setResendTimer(60);
     try {
@@ -86,7 +90,7 @@ export default function OtpVerifyPage() {
         const result = await response.json();
         throw new Error(result.error?.message || "Failed to resend");
       }
-      toast({ title: "Code Sent", description: "A new code has been sent to your email." });
+      toast({ title: "New Code Sent", description: "Check your inbox (and spam folder)." });
     } catch (error) {
       toast({
         title: "Error",
@@ -94,17 +98,28 @@ export default function OtpVerifyPage() {
         variant: "destructive",
       });
       setCanResend(true);
+    } finally {
+      setIsResending(false);
     }
   };
 
+  // Auto-verify when all 6 digits are entered
   useEffect(() => {
     if (otp.length === 6) {
       handleVerify();
     }
   }, [otp]);
 
+  // Mask email for display: z***@gmail.com
+  const maskedEmail = email
+    ? email.replace(/^(.{2})(.*)(@.*)$/, (_m, a, _b, c) => `${a}***${c}`)
+    : "";
+
   return (
-    <AuthLayout title="Enter Code" subtitle={`We sent a 6-digit code to ${email}`}>
+    <AuthLayout
+      title="Enter Your Code"
+      subtitle={`We sent a 6-digit code to ${maskedEmail}`}
+    >
       <div className="flex flex-col items-center space-y-6">
         <InputOTP
           value={otp}
@@ -123,6 +138,10 @@ export default function OtpVerifyPage() {
           </InputOTPGroup>
         </InputOTP>
 
+        <p className="text-xs text-muted-foreground text-center">
+          Code expires in 10 minutes. Check your spam folder if you can't find it.
+        </p>
+
         <Button
           onClick={handleVerify}
           className="w-full h-12 text-base font-semibold"
@@ -139,23 +158,35 @@ export default function OtpVerifyPage() {
           )}
         </Button>
 
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-2">
-            Didn't receive the code?
-          </p>
+        <div className="text-center space-y-1">
+          <p className="text-sm text-muted-foreground">Didn't receive the code?</p>
           <Button
             variant="ghost"
             onClick={handleResend}
-            disabled={!canResend}
+            disabled={!canResend || isResending}
             className="text-primary"
             data-testid="button-resend"
           >
-            {canResend ? "Resend Code" : `Resend in ${resendTimer}s`}
+            {isResending ? (
+              <>
+                <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                Sending...
+              </>
+            ) : canResend ? (
+              "Resend Code"
+            ) : (
+              `Resend in ${resendTimer}s`
+            )}
           </Button>
         </div>
       </div>
+
       <div className="mt-6 text-center">
-        <Link href="/otp/start" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground" data-testid="link-back">
+        <Link
+          href="/otp/start"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          data-testid="link-back"
+        >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Change Email
         </Link>

@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Tags, Trash2, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  UtensilsCrossed,
+  Bus,
+  Wifi,
+  BookOpen,
+  Shirt,
+  ShowerHead,
+  Gamepad2,
+  HeartPulse,
+  Home,
+  Music,
+  Tags,
+  TrendingUp,
+  Gift,
+  RotateCcw,
+  CircleDollarSign,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,6 +55,28 @@ import { useToast } from "@/hooks/use-toast";
 import { SubPageLayout } from "@/components/layout/SubPageLayout";
 import { apiRequest } from "@/lib/api";
 import type { Category } from "@shared/schema";
+
+// Map category names to meaningful icons
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  "Food": UtensilsCrossed,
+  "Transport": Bus,
+  "Data & Airtime": Wifi,
+  "Books & Supplies": BookOpen,
+  "Clothing": Shirt,
+  "Toiletries": ShowerHead,
+  "Entertainment": Gamepad2,
+  "Health": HeartPulse,
+  "Rent": Home,
+  "Fun": Music,
+  "Allowance": TrendingUp,
+  "Gift": Gift,
+  "Refund": RotateCcw,
+  "Other Income": CircleDollarSign,
+};
+
+function getCategoryIcon(name: string): React.ElementType {
+  return CATEGORY_ICONS[name] || Tags;
+}
 
 export default function CategoriesPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,75 +145,64 @@ export default function CategoriesPage() {
   const incomeCategories = categories?.filter((c) => c.kind === "income" && !c.archivedAt) || [];
   const bothCategories = categories?.filter((c) => c.kind === "both" && !c.archivedAt) || [];
 
-  const getKindBadge = (kind: string) => {
-    switch (kind) {
-      case "expense":
-        return <Badge variant="secondary" className="bg-red-100 text-red-700">Expense</Badge>;
-      case "income":
-        return <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">Income</Badge>;
-      case "both":
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-700">Both</Badge>;
-      default:
-        return null;
-    }
-  };
-
   const CategoryList = ({ cats, title }: { cats: Category[]; title: string }) => (
     cats.length > 0 && (
       <div className="mb-6">
         <h3 className="text-sm font-medium text-muted-foreground mb-3">{title}</h3>
         <Card>
           <CardContent className="p-0 divide-y divide-border">
-            {cats.map((category) => (
-              <div key={category.id} className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Tags className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{category.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      {getKindBadge(category.kind)}
+            {cats.map((category) => {
+              const Icon = getCategoryIcon(category.name);
+              return (
+                <div key={category.id} className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{category.name}</p>
                       {category.isDefault && (
-                        <Badge variant="outline" className="text-xs">Default</Badge>
+                        <div className="mt-1">
+                          <Badge variant="outline" className="text-xs">Default</Badge>
+                        </div>
                       )}
                     </div>
                   </div>
-                </div>
-                {!category.isDefault && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        data-testid={`button-delete-${category.id}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Archive Category</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This category will be archived and won't appear in new transactions.
-                          Existing transactions will keep this category.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteMutation.mutate(category.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  {!category.isDefault && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          data-testid={`button-delete-${category.id}`}
                         >
-                          Archive
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
-            ))}
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Archive Category</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This category will be archived and won't appear in new transactions.
+                            Existing transactions will keep this category.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteMutation.mutate(category.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Archive
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
@@ -249,7 +279,7 @@ export default function CategoriesPage() {
             <CategoryList cats={expenseCategories} title="Expense Categories" />
             <CategoryList cats={incomeCategories} title="Income Categories" />
             <CategoryList cats={bothCategories} title="Expense & Income" />
-            
+
             {categories?.length === 0 && (
               <Card className="border-dashed border-2">
                 <CardContent className="p-8 text-center">

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation } from "wouter";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,7 +45,10 @@ export default function OtpStartPage() {
       if (!response.ok) {
         throw new Error(result.error?.message || "Failed to send code");
       }
-      toast({ title: "Code Sent", description: "Check your email for the verification code." });
+      toast({
+        title: "Code Sent!",
+        description: `A 6-digit code was sent to ${data.email}. Check your inbox (and spam).`,
+      });
       setLocation(`/otp/verify?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       toast({
@@ -59,7 +62,10 @@ export default function OtpStartPage() {
   };
 
   return (
-    <AuthLayout title="Sign in with Email" subtitle="We'll send a one-time code to your email">
+    <AuthLayout
+      title="Sign in with Email"
+      subtitle="We'll send a one-time 6-digit code to your email address"
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -73,6 +79,7 @@ export default function OtpStartPage() {
                     type="email"
                     placeholder="you@university.edu"
                     data-testid="input-email"
+                    autoFocus
                     {...field}
                   />
                 </FormControl>
@@ -92,13 +99,25 @@ export default function OtpStartPage() {
                 Sending Code...
               </>
             ) : (
-              "Send Code"
+              <>
+                <Mail className="mr-2 h-4 w-4" />
+                Send Code to Email
+              </>
             )}
           </Button>
         </form>
       </Form>
+
+      <p className="mt-4 text-xs text-center text-muted-foreground">
+        Didn't get an email? Check your spam folder or try again.
+      </p>
+
       <div className="mt-6 text-center">
-        <Link href="/login" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground" data-testid="link-back">
+        <Link
+          href="/login"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          data-testid="link-back"
+        >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to Sign In
         </Link>

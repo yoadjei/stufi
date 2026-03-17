@@ -1,24 +1,30 @@
 import { Link } from "wouter";
-import { ArrowUpRight, Wallet, Receipt, Calendar, ChevronRight } from "lucide-react";
+import {
+  ShoppingCart,
+  TrendingUp,
+  Receipt,
+  Calendar,
+  ChevronRight,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 const actions = [
   {
     path: "/transact/expense",
-    icon: ArrowUpRight,
-    label: "Send money",
-    description: "Record money you spent",
-    bgColor: "bg-gray-50",
-    iconBgColor: "bg-white",
-    iconColor: "text-gray-600",
+    icon: ShoppingCart,
+    label: "Record Expense",
+    description: "Track money you've spent",
+    bgColor: "bg-red-50",
+    iconBgColor: "bg-red-100",
+    iconColor: "text-red-600",
     testId: "link-add-expense",
   },
   {
     path: "/transact/income",
-    icon: Wallet,
-    label: "Deposit into account",
-    description: "Record money you received",
+    icon: TrendingUp,
+    label: "Record Income",
+    description: "Log money you received",
     bgColor: "bg-amber-50",
     iconBgColor: "bg-amber-100",
     iconColor: "text-amber-600",
@@ -39,9 +45,9 @@ const actions = [
     icon: Calendar,
     label: "Transaction history",
     description: "View all your transactions",
-    bgColor: "bg-gray-50",
-    iconBgColor: "bg-white",
-    iconColor: "text-gray-600",
+    bgColor: "bg-blue-50",
+    iconBgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
     testId: "link-history",
   },
 ];
@@ -60,8 +66,8 @@ export default function TransactPage() {
             const Icon = action.icon;
             return (
               <Link key={action.path} href={action.path}>
-                <Card 
-                  className={`hover-elevate cursor-pointer border-0 shadow-sm ${action.bgColor}`} 
+                <Card
+                  className={`hover-elevate cursor-pointer border-0 shadow-sm ${action.bgColor}`}
                   data-testid={action.testId}
                 >
                   <CardContent className="p-4 flex items-center gap-4">

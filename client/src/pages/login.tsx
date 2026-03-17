@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, Loader2, Mail, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -25,6 +26,7 @@ type FormData = z.infer<typeof loginUserSchema>;
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -49,7 +51,7 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(result.error?.message || "Login failed");
       }
-      login(result.user, result.token);
+      login(result.user, result.token, false, rememberMe);
       toast({ title: "Welcome back!", description: "Signed in successfully." });
       setLocation("/");
     } catch (error) {
@@ -101,29 +103,45 @@ export default function LoginPage() {
                   </Link>
                 </div>
                 <FormControl>
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter password"
+                      className="pr-10"
                       data-testid="input-password"
                       {...field}
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3"
+                      className="absolute right-3 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                       data-testid="button-toggle-password"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {/* Remember Me */}
+          <div className="flex items-center gap-2 pt-1">
+            <Checkbox
+              id="remember-me"
+              checked={rememberMe}
+              onCheckedChange={(v) => setRememberMe(!!v)}
+              data-testid="checkbox-remember-me"
+            />
+            <label
+              htmlFor="remember-me"
+              className="text-sm text-muted-foreground cursor-pointer select-none"
+            >
+              Remember me
+            </label>
+          </div>
+
           <Button
             type="submit"
             className="w-full h-12 text-base font-semibold rounded-lg"
