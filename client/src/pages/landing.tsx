@@ -9,7 +9,7 @@ type Story = {
     durationMs: number;
 };
 
-type Stage = "preStory" | "playing" | "empathy" | "completed";
+type Stage = "playing" | "empathy" | "completed";
 
 const bubbleLayouts = [
     { align: "left", maxW: "72%" },
@@ -25,7 +25,7 @@ const bubbleLayouts = [
 ];
 
 export default function LandingPage() {
-    const [stage, setStage] = useState<Stage>("preStory");
+    const [stage, setStage] = useState<Stage>("playing");
     const [stories, setStories] = useState<Story[]>([]);
     const [visibleCount, setVisibleCount] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -35,23 +35,16 @@ export default function LandingPage() {
         fetch(`${apiBase}/api/onboarding/stories`)
             .then((r) => r.json())
             .then((data: Story[]) => {
-                if (Array.isArray(data) && data.length > 0) setStories(data);
+                if (Array.isArray(data) && data.length > 0) {
+                    setStories(data);
+                } else {
+                    setStage("completed");
+                }
             })
-            .catch(() => { });
-    }, []);
-
-    // preStory → playing after 3s
-    useEffect(() => {
-        if (stage !== "preStory") return;
-        const t = setTimeout(() => {
-            if (stories.length > 0) {
-                setStage("playing");
-            } else {
+            .catch(() => {
                 setStage("completed");
-            }
-        }, 3000);
-        return () => clearTimeout(t);
-    }, [stage, stories]);
+            });
+    }, []);
 
     // drip bubbles in one by one
     useEffect(() => {
@@ -88,27 +81,7 @@ export default function LandingPage() {
             className="min-h-screen flex flex-col relative overflow-hidden bg-white"
             style={{ fontFamily: `var(--ob-font)` }}
         >
-            {/* ─── SPLASH ─── */}
-            {stage === "preStory" && (
-                <div
-                    className="absolute inset-0 flex flex-col items-center justify-center"
-                    style={{ animation: "scale-in 0.8s cubic-bezier(0.16,1,0.3,1) both" }}
-                >
-                    <div
-                        className="w-20 h-20 flex items-center justify-center mb-6 overflow-hidden bg-white"
-                        style={{
-                            borderRadius: "var(--ob-radius-xl)",
-                            boxShadow: `0 0 60px hsl(var(--ob-primary) / 0.15)`,
-                        }}
-                    >
-                        <img src="/icon.png" alt="StuFi Logo" className="w-full h-full object-cover" />
-                    </div>
-                    <div style={{ animation: "fade-up 0.6s 0.4s both" }}>
-                        <h1 className="text-xl font-bold text-center mb-1 text-gray-900">StuFi</h1>
-                        <p className="text-sm text-center text-gray-400">Help you track</p>
-                    </div>
-                </div>
-            )}
+
 
             {/* ─── THOUGHT BUBBLES (scrollable) ─── */}
             {(stage === "playing" || stage === "empathy") && (

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 // step definitions
 const TOTAL_STEPS = 7;
@@ -45,6 +46,8 @@ export default function OnboardingPage() {
     const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
 
@@ -81,7 +84,7 @@ export default function OnboardingPage() {
             case 3: return frequency !== "";
             case 4: return selectedRegular.length > 0;
             case 5: return true; // extras are optional
-            case 6: return email.includes("@") && password.length >= 8;
+            case 6: return email.includes("@") && password.length >= 8 && password === confirmPassword;
             default: return false;
         }
     };
@@ -324,13 +327,39 @@ export default function OnboardingPage() {
                             autoFocus
                         />
                         <label className="text-sm font-medium text-gray-700 mb-2 block">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="at least 8 characters"
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-base"
-                        />
+                        <div className="relative mb-4">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="at least 8 characters"
+                                className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-base"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Re-enter Password</label>
+                        <div className="relative mb-2">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="confirm your password"
+                                className={`w-full px-4 py-3 pr-12 rounded-xl border bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 text-base ${
+                                    confirmPassword && password !== confirmPassword 
+                                        ? "border-red-300 focus:border-red-500" 
+                                        : "border-gray-200 focus:border-primary"
+                                }`}
+                            />
+                            {confirmPassword && password !== confirmPassword && (
+                                <p className="text-xs text-red-500 mt-1.5 ml-1 absolute -bottom-5">Passwords do not match</p>
+                            )}
+                        </div>
                     </div>
                 )}
 
