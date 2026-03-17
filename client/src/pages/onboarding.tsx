@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { apiBase } from "@/lib/api";
 
 // step definitions
 const TOTAL_STEPS = 7;
@@ -132,7 +133,7 @@ export default function OnboardingPage() {
         ].map(c => ({ name: c.label, emoji: c.emoji }));
 
         try {
-            const res = await fetch("/api/onboard", {
+            const res = await fetch(`${apiBase}/api/onboard`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
