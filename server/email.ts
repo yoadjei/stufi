@@ -22,16 +22,27 @@ function getTransporter(): nodemailer.Transporter | null {
 
   if (gmailUser && gmailPass) {
     console.log(`[email] Configuring Gmail transport for ${gmailUser}`);
-    // Use explicit SMTP settings instead of "service: gmail" for better
-    // compatibility with hosted environments (Render, Railway, etc.)
+    // Port 587 + STARTTLS (secure: false) — required on cloud hosts (Render, Railway, etc.)
+    // that block outbound port 465 (SSL). Gmail supports both but 587 is universally open.
     transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // SSL — most reliable on cloud hosts
+      port: 587,
+      secure: false, // STARTTLS — upgrades after connection, works on all cloud hosts
       auth: {
         user: gmailUser,
         pass: gmailPass,
       },
+      pool: true,          // reuse connections — prevents per-email TCP+TLS overhead
+      maxConnections: 5,   // cap concurrent SMTP connections
+      maxMessages: 100,    // recycle connection after 100 messages
+      connectionTimeout: 10000,  // 10s to establish TCP connection
+      greetingTimeout: 10000,    // 10s to receive SMTP greeting
+      socketTimeout: 30000,      // 30s idle socket timeout
+    });
+    // Pool emits 'error' events for connection failures; without a listener Node.js
+    // throws an unhandled EventEmitter error and crashes the process under load.
+    transporter.on("error", (err) => {
+      console.error("[email] SMTP pool error:", err.message);
     });
     return transporter;
   }
@@ -51,6 +62,15 @@ function getTransporter(): nodemailer.Transporter | null {
         user: smtpUser,
         pass: smtpPass,
       },
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 30000,
+    });
+    transporter.on("error", (err) => {
+      console.error("[email] SMTP pool error:", err.message);
     });
     return transporter;
   }
