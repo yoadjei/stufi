@@ -22,6 +22,12 @@ services:
         sync: false
       - key: CORS_ORIGIN
         sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
 
 databases:
   - name: stufi-db

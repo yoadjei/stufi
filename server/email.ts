@@ -12,7 +12,8 @@ interface EmailOptions {
 
 let transporter: nodemailer.Transporter | null = null;
 
-// grab the right email transport based on env vars
+// Build the transporter fresh each call if not yet cached
+// (don't cache null — env vars might not be loaded at first call)
 function getTransporter(): nodemailer.Transporter | null {
   if (transporter) return transporter;
 
@@ -20,8 +21,13 @@ function getTransporter(): nodemailer.Transporter | null {
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
 
   if (gmailUser && gmailPass) {
+    console.log(`[email] Configuring Gmail transport for ${gmailUser}`);
+    // Use explicit SMTP settings instead of "service: gmail" for better
+    // compatibility with hosted environments (Render, Railway, etc.)
     transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // SSL — most reliable on cloud hosts
       auth: {
         user: gmailUser,
         pass: gmailPass,
@@ -30,7 +36,7 @@ function getTransporter(): nodemailer.Transporter | null {
     return transporter;
   }
 
-  // fallback to generic SMTP if gmail isn't configured
+  // fallback to generic SMTP if configured
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = parseInt(process.env.SMTP_PORT || "587");
   const smtpUser = process.env.SMTP_USER;
@@ -49,9 +55,11 @@ function getTransporter(): nodemailer.Transporter | null {
     return transporter;
   }
 
-  // no config = just log emails to console
+  console.warn("[email] No SMTP credentials found in environment — emails will be logged to console only.");
+  // Return null but do NOT cache it, so the next call can retry
   return null;
 }
+
 
 async function sendEmail(options: EmailOptions): Promise<boolean> {
   const transport = getTransporter();
