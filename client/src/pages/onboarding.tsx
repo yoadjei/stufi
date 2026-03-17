@@ -84,9 +84,37 @@ export default function OnboardingPage() {
             case 3: return frequency !== "";
             case 4: return selectedRegular.length > 0;
             case 5: return true; // extras are optional
-            case 6: return email.includes("@") && password.length >= 8 && password === confirmPassword;
+            case 6: return email.includes("@") && password.length >= 8 && password === confirmPassword && calculateStrength(password) >= 2;
             default: return false;
         }
+    };
+
+    const calculateStrength = (pass: string) => {
+        let score = 0;
+        if (!pass) return score;
+        if (pass.length >= 8) score += 1;
+        if (pass.length >= 12) score += 1;
+        if (/[A-Z]/.test(pass)) score += 1;
+        if (/[0-9]/.test(pass)) score += 1;
+        if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+        return Math.min(4, score);
+    };
+
+    const strength = calculateStrength(password);
+    const getStrengthColor = () => {
+        if (strength === 0) return "bg-gray-200";
+        if (strength === 1) return "bg-red-400";
+        if (strength === 2) return "bg-yellow-400";
+        if (strength === 3) return "bg-green-400";
+        return "bg-green-500";
+    };
+    
+    const getStrengthLabel = () => {
+        if (!password) return "";
+        if (strength === 1) return "Weak";
+        if (strength === 2) return "Fair";
+        if (strength === 3) return "Good";
+        return "Strong";
     };
 
     const toggleCategory = (id: string, list: string[], setList: (v: string[]) => void) => {
@@ -343,6 +371,33 @@ export default function OnboardingPage() {
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
                         </div>
+                        {/* Password Strength Indicator */}
+                        {password && (
+                            <div className="mb-4">
+                                <div className="flex gap-1.5 mb-1.5 h-1.5 w-full">
+                                    {[1, 2, 3, 4].map((level) => (
+                                        <div 
+                                            key={level} 
+                                            className={`flex-1 rounded-full transition-colors duration-300 ${
+                                                strength >= level ? getStrengthColor() : "bg-gray-200"
+                                            }`} 
+                                        />
+                                    ))}
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className={`font-medium ${
+                                        strength === 1 ? "text-red-500" :
+                                        strength === 2 ? "text-yellow-600" :
+                                        strength >= 3 ? "text-green-600" : "text-gray-500"
+                                    }`}>
+                                        {getStrengthLabel()}
+                                    </span>
+                                    {strength < 2 && (
+                                        <span className="text-gray-400">Add numbers & symbols</span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         <label className="text-sm font-medium text-gray-700 mb-2 block">Re-enter Password</label>
                         <div className="relative mb-2">
                             <input
