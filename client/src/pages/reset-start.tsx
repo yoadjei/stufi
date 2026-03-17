@@ -41,11 +41,10 @@ export default function ResetStartPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      const { email } = data; // Destructure email from data
       const response = await fetch(`${apiBase}/api/auth/reset/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(data),
       });
       const result = await response.json();
       if (!response.ok) {
