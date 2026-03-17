@@ -182,16 +182,16 @@ function Router() {
         <ProtectedRoute><SecurityPage /></ProtectedRoute>
       </Route>
       <Route path="/contact">
-        <ProtectedRoute><ContactPage /></ProtectedRoute>
+        <ContactPage />
       </Route>
       <Route path="/refer">
         <ProtectedRoute><ReferPage /></ProtectedRoute>
       </Route>
       <Route path="/terms">
-        <ProtectedRoute><TermsPage /></ProtectedRoute>
+        <TermsPage />
       </Route>
       <Route path="/privacy">
-        <ProtectedRoute><PrivacyPage /></ProtectedRoute>
+        <PrivacyPage />
       </Route>
 
       {/* fallback */}

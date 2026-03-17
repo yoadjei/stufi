@@ -1,6 +1,8 @@
 
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
+import { apiBase } from "@/lib/api";
+import { PiggyBank, TrendingDown, BarChart3, Shield, ChevronRight } from "lucide-react";
 
 type Story = {
     id: string;
@@ -23,15 +25,46 @@ const bubbleLayouts = [
     { align: "right", maxW: "66%" },
 ];
 
+const features = [
+    {
+        icon: PiggyBank,
+        title: "Track Your Allowance",
+        description: "Set your budget cycle and know exactly how much you can spend each day.",
+        color: "from-blue-500 to-cyan-400",
+        bg: "bg-blue-50",
+    },
+    {
+        icon: TrendingDown,
+        title: "Log Every Expense",
+        description: "Quickly record spending by category — food, transport, data, and more.",
+        color: "from-emerald-500 to-teal-400",
+        bg: "bg-emerald-50",
+    },
+    {
+        icon: BarChart3,
+        title: "Smart Insights",
+        description: "See where your money goes with charts, daily caps, and survival forecasts.",
+        color: "from-violet-500 to-purple-400",
+        bg: "bg-violet-50",
+    },
+    {
+        icon: Shield,
+        title: "Secure & Private",
+        description: "Your financial data is encrypted and never shared with third parties.",
+        color: "from-amber-500 to-orange-400",
+        bg: "bg-amber-50",
+    },
+];
+
 export default function LandingPage() {
     const [stage, setStage] = useState<Stage>("preStory");
     const [stories, setStories] = useState<Story[]>([]);
     const [visibleCount, setVisibleCount] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // fetch from DB
+    // fetch from DB — use apiBase so it reaches the Render backend
     useEffect(() => {
-        fetch("/api/onboarding/stories")
+        fetch(`${apiBase}/api/onboarding/stories`)
             .then((r) => r.json())
             .then((data: Story[]) => {
                 if (Array.isArray(data) && data.length > 0) setStories(data);
@@ -39,12 +72,18 @@ export default function LandingPage() {
             .catch(() => { });
     }, []);
 
-    // preStory → playing after 3s
+    // preStory → playing after 3s (or skip to completed if no stories loaded)
     useEffect(() => {
         if (stage !== "preStory") return;
-        const t = setTimeout(() => setStage("playing"), 3000);
+        const t = setTimeout(() => {
+            if (stories.length > 0) {
+                setStage("playing");
+            } else {
+                setStage("completed");
+            }
+        }, 3000);
         return () => clearTimeout(t);
-    }, [stage]);
+    }, [stage, stories]);
 
     // drip bubbles in one by one
     useEffect(() => {
@@ -188,67 +227,113 @@ export default function LandingPage() {
                 </div>
             )}
 
-            {/* ─── AUTH CHOICE (white bg → smooth transition to onboarding) ─── */}
+            {/* ─── AUTH CHOICE + FEATURES ─── */}
             {stage === "completed" && (
                 <div
-                    className="absolute inset-0 flex flex-col items-center justify-center px-6 md:px-10 bg-white"
+                    className="min-h-screen flex flex-col bg-white overflow-y-auto"
                     style={{ animation: "fade-in 0.6s cubic-bezier(0.16,1,0.3,1) both" }}
                 >
-                    {/* icon */}
-                    <div className="relative mb-7">
-                        <div
-                            className="absolute blur-3xl rounded-full opacity-10"
-                            style={{
-                                background: primaryColor,
-                                width: 140, height: 140,
-                                left: "50%", top: "50%",
-                                transform: "translate(-50%, -50%)",
-                            }}
-                        />
-                        <div
-                            className="w-16 h-16 flex items-center justify-center relative z-10 overflow-hidden bg-white"
-                            style={{
-                                borderRadius: "var(--ob-radius-xl)",
-                                boxShadow: `0 8px 40px hsl(var(--ob-primary) / 0.2)`,
-                            }}
-                        >
-                            <img src="/icon.png" alt="StuFi Logo" className="w-full h-full object-cover" />
+                    {/* hero section */}
+                    <div className="flex flex-col items-center justify-center px-6 md:px-10 pt-20 pb-12">
+                        {/* icon */}
+                        <div className="relative mb-7">
+                            <div
+                                className="absolute blur-3xl rounded-full opacity-10"
+                                style={{
+                                    background: primaryColor,
+                                    width: 140, height: 140,
+                                    left: "50%", top: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                }}
+                            />
+                            <div
+                                className="w-16 h-16 flex items-center justify-center relative z-10 overflow-hidden bg-white"
+                                style={{
+                                    borderRadius: "var(--ob-radius-xl)",
+                                    boxShadow: `0 8px 40px hsl(var(--ob-primary) / 0.2)`,
+                                }}
+                            >
+                                <img src="/icon.png" alt="StuFi Logo" className="w-full h-full object-cover" />
+                            </div>
+                        </div>
+
+                        <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">
+                            StuFi can help.
+                        </h2>
+                        <p className="text-center max-w-xs mb-10 leading-relaxed text-gray-500 text-[15px]">
+                            Know exactly where your allowance goes and make it last the whole month.
+                        </p>
+
+                        <div className="w-full max-w-xs md:max-w-sm space-y-3" style={{ animation: "fade-up 0.5s 0.2s both" }}>
+                            <Link href="/onboarding" className="block">
+                                <button
+                                    className="w-full py-4 font-semibold text-base text-white transition-all active:scale-[0.98]"
+                                    style={{
+                                        borderRadius: "var(--ob-radius-lg)",
+                                        background: primaryColor,
+                                        boxShadow: `0 4px 24px hsl(var(--ob-primary) / 0.2)`,
+                                    }}
+                                >
+                                    Get started, it's free
+                                </button>
+                            </Link>
+
+                            <Link href="/login" className="block">
+                                <button
+                                    className="w-full py-4 font-medium text-base transition-all active:scale-[0.98]"
+                                    style={{
+                                        borderRadius: "var(--ob-radius-lg)",
+                                        border: `1px solid #e5e7eb`,
+                                        color: "#374151",
+                                    }}
+                                >
+                                    I already have an account
+                                </button>
+                            </Link>
                         </div>
                     </div>
 
-                    <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">
-                        StuFi can help.
-                    </h2>
-                    <p className="text-center max-w-xs mb-10 leading-relaxed text-gray-500 text-[15px]">
-                        Know exactly where your allowance goes and make it last the whole month.
-                    </p>
+                    {/* ─── FEATURES SECTION ─── */}
+                    <div className="px-6 md:px-10 pb-16">
+                        <div className="max-w-2xl mx-auto">
+                            <h3 className="text-lg font-bold text-center text-gray-900 mb-2" style={{ animation: "fade-up 0.6s 0.3s both" }}>
+                                Why students love StuFi
+                            </h3>
+                            <p className="text-sm text-center text-gray-400 mb-8" style={{ animation: "fade-up 0.6s 0.4s both" }}>
+                                Built for the way you actually spend
+                            </p>
 
-                    <div className="w-full max-w-xs md:max-w-sm space-y-3" style={{ animation: "fade-up 0.5s 0.2s both" }}>
-                        <Link href="/onboarding" className="block">
-                            <button
-                                className="w-full py-4 font-semibold text-base text-white transition-all active:scale-[0.98]"
-                                style={{
-                                    borderRadius: "var(--ob-radius-lg)",
-                                    background: primaryColor,
-                                    boxShadow: `0 4px 24px hsl(var(--ob-primary) / 0.2)`,
-                                }}
-                            >
-                                Get started, it's free
-                            </button>
-                        </Link>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {features.map((feature, i) => {
+                                    const Icon = feature.icon;
+                                    return (
+                                        <div
+                                            key={feature.title}
+                                            className="rounded-2xl border border-gray-100 p-5 bg-white hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                                            style={{ animation: `fade-up 0.5s ${0.3 + i * 0.1}s both` }}
+                                        >
+                                            <div className={`w-11 h-11 rounded-xl ${feature.bg} flex items-center justify-center mb-3`}>
+                                                <Icon className="w-5 h-5 text-gray-700" />
+                                            </div>
+                                            <h4 className="font-semibold text-sm text-gray-900 mb-1">{feature.title}</h4>
+                                            <p className="text-xs text-gray-500 leading-relaxed">{feature.description}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
 
-                        <Link href="/login" className="block">
-                            <button
-                                className="w-full py-4 font-medium text-base transition-all active:scale-[0.98]"
-                                style={{
-                                    borderRadius: "var(--ob-radius-lg)",
-                                    border: `1px solid #e5e7eb`,
-                                    color: "#374151",
-                                }}
-                            >
-                                I already have an account
-                            </button>
-                        </Link>
+                    {/* ─── FOOTER ─── */}
+                    <div className="mt-auto px-6 py-6 text-center border-t border-gray-100">
+                        <p className="text-xs text-gray-400">
+                            <Link href="/contact" className="hover:underline text-gray-400">Contact us</Link>
+                            {" · "}
+                            <Link href="/terms" className="hover:underline text-gray-400">Terms</Link>
+                            {" · "}
+                            <Link href="/privacy" className="hover:underline text-gray-400">Privacy</Link>
+                        </p>
+                        <p className="text-xs text-gray-300 mt-2">© 2026 StuFi. All rights reserved.</p>
                     </div>
                 </div>
             )}

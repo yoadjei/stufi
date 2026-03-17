@@ -1,3 +1,7 @@
+/** Base URL for the backend – empty when served from the same origin (dev / Render),
+ *  set via VITE_API_URL when the frontend is deployed separately (Vercel). */
+export const apiBase = import.meta.env.VITE_API_URL || "";
+
 export async function apiRequest(
   method: string,
   url: string,
