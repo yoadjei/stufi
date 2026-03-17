@@ -104,13 +104,14 @@ app.use((req, res, next) => {
 
   // start the server — serves both the API and the client
   const port = parseInt(process.env.PORT || "5000", 10);
+  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
   httpServer.listen(
     {
       port,
-      host: "localhost",
+      host,
     },
     () => {
-      log(`serving on http://localhost:${port}`);
+      log(`serving on http://${host}:${port}`);
     },
   );
 })();
