@@ -1,111 +1,49 @@
 // email service for StuFi
 // handles OTP codes, password resets, and spending alerts
 // logs to console in dev mode, sends via SMTP/Gmail in production
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 interface EmailOptions {
-  to: string;
+  to: string | string[];
   subject: string;
   text: string;
   html?: string;
 }
 
-let transporter: nodemailer.Transporter | null = null;
+// Initialize Resend with your API Key
+export const resend = new Resend(process.env.RESEND_API_KEY || "fallback_key");
 
-// Build the transporter fresh each call if not yet cached
-// (don't cache null — env vars might not be loaded at first call)
-function getTransporter(): nodemailer.Transporter | null {
-  if (transporter) return transporter;
-
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailPass = process.env.GMAIL_APP_PASSWORD;
-
-  if (gmailUser && gmailPass) {
-    console.log(`[email] Configuring Gmail transport for ${gmailUser}`);
-    // Port 587 + STARTTLS (secure: false) — required on cloud hosts (Render, Railway, etc.)
-    // that block outbound port 465 (SSL). Gmail supports both but 587 is universally open.
-    transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // STARTTLS — upgrades after connection, works on all cloud hosts
-      auth: {
-        user: gmailUser,
-        pass: gmailPass,
-      },
-      pool: true,          // reuse connections — prevents per-email TCP+TLS overhead
-      maxConnections: 5,   // cap concurrent SMTP connections
-      maxMessages: 100,    // recycle connection after 100 messages
-      connectionTimeout: 10000,  // 10s to establish TCP connection
-      greetingTimeout: 10000,    // 10s to receive SMTP greeting
-      socketTimeout: 30000,      // 30s idle socket timeout
-    });
-    // Pool emits 'error' events for connection failures; without a listener Node.js
-    // throws an unhandled EventEmitter error and crashes the process under load.
-    transporter.on("error", (err) => {
-      console.error("[email] SMTP pool error:", err.message);
-    });
-    return transporter;
-  }
-
-  // fallback to generic SMTP if configured
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = parseInt(process.env.SMTP_PORT || "587");
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  if (smtpHost && smtpUser && smtpPass) {
-    transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 30000,
-    });
-    transporter.on("error", (err) => {
-      console.error("[email] SMTP pool error:", err.message);
-    });
-    return transporter;
-  }
-
-  console.warn("[email] No SMTP credentials found in environment — emails will be logged to console only.");
-  // Return null but do NOT cache it, so the next call can retry
-  return null;
-}
-
-
-async function sendEmail(options: EmailOptions): Promise<boolean> {
-  const transport = getTransporter();
-
-  if (!transport) {
-    // dev mode — print it out so we can debug
-    console.log("=== EMAIL (dev mode) ===");
+export async function sendEmail(options: EmailOptions): Promise<boolean> {
+  if (!process.env.RESEND_API_KEY) {
+    // dev mode / fallback — print it out so we can debug
+    console.log("=== EMAIL (dev mode - no Resend API key found) ===");
     console.log(`To: ${options.to}`);
     console.log(`Subject: ${options.subject}`);
     console.log(`Body: ${options.text}`);
-    console.log("========================");
+    console.log("==================================================");
     return true;
   }
 
   try {
-    const fromEmail = process.env.GMAIL_USER || process.env.SMTP_USER || "noreply@stufi.app";
-    await transport.sendMail({
-      from: `"StuFi" <${fromEmail}>`,
-      to: options.to,
+    // During Resend onboarding, you can only send emails TO your own verified email (the one you signed up with)
+    // and FROM this exact onboarding domain. Once you verify your own custom domain (e.g. stufi.app), you update this.
+    const { data, error } = await resend.emails.send({
+      from: "StuFi <onboarding@resend.dev>",
+      to: typeof options.to === 'string' ? [options.to] : options.to,
       subject: options.subject,
       text: options.text,
       html: options.html,
     });
+
+    if (error) {
+      console.error("[Email] Resend API error:", error);
+      return false;
+    }
+
+    console.log("[Email] Sent successfully via Resend. ID:", data?.id);
     return true;
-  } catch (error) {
-    console.error("Email send error:", error);
+  } catch (err) {
+    console.error("[Email] Unexpected error sending email:", err);
     return false;
   }
 }
