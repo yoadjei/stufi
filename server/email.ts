@@ -50,11 +50,11 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 
 // send One-Time Password for login
 export async function sendOtpEmail(email: string, otp: string): Promise<boolean> {
-  const appUrl = process.env.APP_URL || "https://stufi.app";
+  const appUrl = process.env.APP_URL || "https://stu-fi.vercel.app";
   return sendEmail({
     to: email,
     subject: "Your StuFi Login Code",
-    text: `Your one-time login code is: ${otp}\n\nThis code expires in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}`,
+    text: `Your one-time login code is: ${otp}\n\nThis code expires in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}/otp/start`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #3b82f6; margin-bottom: 20px;">StuFi</h2>
@@ -65,7 +65,7 @@ export async function sendOtpEmail(email: string, otp: string): Promise<boolean>
         <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request this code, you can safely ignore this email.</p>
         <div style="text-align: center; margin: 24px 0 8px;">
-          <a href="${appUrl}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
+          <a href="${appUrl}/otp/start" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
         </div>
       </div>
     `,
@@ -74,11 +74,11 @@ export async function sendOtpEmail(email: string, otp: string): Promise<boolean>
 
 // password reset via 6-digit code
 export async function sendPasswordResetCode(email: string, code: string): Promise<boolean> {
-  const appUrl = process.env.APP_URL || "https://stufi.app";
+  const appUrl = process.env.APP_URL || "https://stu-fi.vercel.app";
   return sendEmail({
     to: email,
     subject: "Reset Your StuFi Password",
-    text: `Your password reset code is: ${code}\n\nThis code expires in 30 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}`,
+    text: `Your password reset code is: ${code}\n\nThis code expires in 30 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}/reset/finish-code?email=${encodeURIComponent(email)}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #3b82f6; margin-bottom: 20px;">StuFi</h2>
@@ -89,7 +89,7 @@ export async function sendPasswordResetCode(email: string, code: string): Promis
         <p style="color: #666; font-size: 14px;">This code expires in 30 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request a password reset, you can safely ignore this email.</p>
         <div style="text-align: center; margin: 24px 0 8px;">
-          <a href="${appUrl}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
+          <a href="${appUrl}/reset/finish-code?email=${encodeURIComponent(email)}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
         </div>
       </div>
     `,
