@@ -34,6 +34,7 @@ export default function ResetFinishCodePage() {
 
   const searchParams = new URLSearchParams(location.split("?")[1] || "");
   const email = searchParams.get("email") || "";
+  const urlCode = searchParams.get("code") || "";
 
   useEffect(() => {
     if (!email) {
@@ -52,7 +53,7 @@ export default function ResetFinishCodePage() {
     ),
     defaultValues: {
       email,
-      code: "",
+      code: urlCode,
       newPassword: "",
       confirmPassword: "",
     },

@@ -14,17 +14,19 @@ import { apiBase } from "@/lib/api";
 import { Link } from "wouter";
 
 export default function OtpVerifyPage() {
-  const [otp, setOtp] = useState("");
+  const [location, setLocation] = useLocation();
+
+  const searchParams = new URLSearchParams(location.split("?")[1] || "");
+  const email = searchParams.get("email") || "";
+  const urlCode = searchParams.get("code") || "";
+
+  const [otp, setOtp] = useState(urlCode);
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
-  const [location, setLocation] = useLocation();
-
-  const searchParams = new URLSearchParams(location.split("?")[1] || "");
-  const email = searchParams.get("email") || "";
 
   useEffect(() => {
     if (!email) {

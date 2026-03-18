@@ -65,7 +65,7 @@ export async function sendOtpEmail(email: string, otp: string): Promise<boolean>
         <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request this code, you can safely ignore this email.</p>
         <div style="text-align: center; margin: 24px 0 8px;">
-          <a href="${appUrl}/otp/start" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
+          <a href="${appUrl}/otp/verify?email=${encodeURIComponent(email)}&code=${otp}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
         </div>
       </div>
     `,
@@ -89,7 +89,7 @@ export async function sendPasswordResetCode(email: string, code: string): Promis
         <p style="color: #666; font-size: 14px;">This code expires in 30 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request a password reset, you can safely ignore this email.</p>
         <div style="text-align: center; margin: 24px 0 8px;">
-          <a href="${appUrl}/reset/finish-code?email=${encodeURIComponent(email)}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
+          <a href="${appUrl}/reset/finish-code?email=${encodeURIComponent(email)}&code=${code}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
         </div>
       </div>
     `,
