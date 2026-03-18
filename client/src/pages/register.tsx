@@ -160,6 +160,7 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout title="Create Account" subtitle="Join StuFi and take control of your finances">
+      {step === 1 && (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onStep1Submit)} className="space-y-4">
           <FormField
@@ -331,6 +332,7 @@ export default function RegisterPage() {
           </Button>
         </form>
       </Form>
+      )}
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
