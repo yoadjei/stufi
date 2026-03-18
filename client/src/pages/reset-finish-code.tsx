@@ -30,9 +30,9 @@ export default function ResetFinishCodePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
-  const searchParams = new URLSearchParams(location.split("?")[1] || "");
+  const searchParams = new URLSearchParams(window.location.search);
   const email = searchParams.get("email") || "";
   const urlCode = searchParams.get("code") || "";
 

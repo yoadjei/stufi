@@ -14,9 +14,9 @@ import { apiBase } from "@/lib/api";
 import { Link } from "wouter";
 
 export default function OtpVerifyPage() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
-  const searchParams = new URLSearchParams(location.split("?")[1] || "");
+  const searchParams = new URLSearchParams(window.location.search);
   const email = searchParams.get("email") || "";
   const urlCode = searchParams.get("code") || "";
 
