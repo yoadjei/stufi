@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff, Loader2, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, Loader2, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -27,6 +26,9 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [pendingData, setPendingData] = useState<FormData | null>(null);
+  const [otp, setOtp] = useState("");
   const { login } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -51,13 +53,45 @@ export default function RegisterPage() {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onStep1Submit = async (data: FormData) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${apiBase}/api/auth/register/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error?.message || "Failed to send code");
+      }
+      setPendingData(data);
+      setStep(2);
+      toast({ title: "Check Your Email", description: "We've sent a 6-digit verification code." });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onStep2Submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingData) return;
+    if (otp.length !== 6) {
+      toast({ title: "Error", description: "Please enter the 6-digit code", variant: "destructive" });
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await fetch(`${apiBase}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...pendingData, otp }),
       });
       const result = await response.json();
       if (!response.ok) {
@@ -77,10 +111,57 @@ export default function RegisterPage() {
     }
   };
 
+  if (step === 2) {
+    return (
+      <AuthLayout title="Verify Your Email" subtitle={`Enter the 6-digit code sent to ${pendingData?.email}`}>
+        <form onSubmit={onStep2Submit} className="space-y-5">
+          <div>
+            <label className="text-sm font-medium leading-none">Verification Code</label>
+            <Input
+              className="mt-2 text-center text-2xl font-bold tracking-[0.5em] h-14"
+              placeholder="000000"
+              maxLength={6}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              data-testid="input-otp"
+              autoFocus
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-semibold rounded-full"
+            disabled={isLoading || otp.length !== 6}
+            data-testid="button-verify"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </Button>
+        </form>
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+            onClick={() => { setStep(1); setOtp(""); }}
+            data-testid="link-back"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back
+          </button>
+        </div>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout title="Create Account" subtitle="Join StuFi and take control of your finances">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onStep1Submit)} className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -239,7 +320,7 @@ export default function RegisterPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Account...
+                Sending Code...
               </>
             ) : (
               <>

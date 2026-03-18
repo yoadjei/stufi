@@ -50,10 +50,11 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 
 // send One-Time Password for login
 export async function sendOtpEmail(email: string, otp: string): Promise<boolean> {
+  const appUrl = process.env.APP_URL || "https://stufi.app";
   return sendEmail({
     to: email,
     subject: "Your StuFi Login Code",
-    text: `Your one-time login code is: ${otp}\n\nThis code expires in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.`,
+    text: `Your one-time login code is: ${otp}\n\nThis code expires in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #3b82f6; margin-bottom: 20px;">StuFi</h2>
@@ -63,6 +64,9 @@ export async function sendOtpEmail(email: string, otp: string): Promise<boolean>
         </div>
         <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request this code, you can safely ignore this email.</p>
+        <div style="text-align: center; margin: 24px 0 8px;">
+          <a href="${appUrl}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
+        </div>
       </div>
     `,
   });
@@ -70,10 +74,11 @@ export async function sendOtpEmail(email: string, otp: string): Promise<boolean>
 
 // password reset via 6-digit code
 export async function sendPasswordResetCode(email: string, code: string): Promise<boolean> {
+  const appUrl = process.env.APP_URL || "https://stufi.app";
   return sendEmail({
     to: email,
     subject: "Reset Your StuFi Password",
-    text: `Your password reset code is: ${code}\n\nThis code expires in 30 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.`,
+    text: `Your password reset code is: ${code}\n\nThis code expires in 30 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.\n\nOpen StuFi: ${appUrl}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #3b82f6; margin-bottom: 20px;">StuFi</h2>
@@ -83,27 +88,9 @@ export async function sendPasswordResetCode(email: string, code: string): Promis
         </div>
         <p style="color: #666; font-size: 14px;">This code expires in 30 minutes.</p>
         <p style="color: #666; font-size: 14px;">If you didn't request a password reset, you can safely ignore this email.</p>
-      </div>
-    `,
-  });
-}
-
-// password reset via clickable link
-export async function sendPasswordResetLink(email: string, resetUrl: string): Promise<boolean> {
-  return sendEmail({
-    to: email,
-    subject: "Reset Your StuFi Password",
-    text: `Click the link below to reset your password:\n\n${resetUrl}\n\nThis link expires in 30 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #3b82f6; margin-bottom: 20px;">StuFi</h2>
-        <p>Click the button below to reset your password:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetUrl}" style="background: #3b82f6; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">Reset Password</a>
+        <div style="text-align: center; margin: 24px 0 8px;">
+          <a href="${appUrl}" style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Open StuFi App</a>
         </div>
-        <p style="color: #666; font-size: 14px;">Or copy this link: ${resetUrl}</p>
-        <p style="color: #666; font-size: 14px;">This link expires in 30 minutes.</p>
-        <p style="color: #666; font-size: 14px;">If you didn't request a password reset, you can safely ignore this email.</p>
       </div>
     `,
   });

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation } from "wouter";
-import { Loader2, ArrowLeft, Mail, Link as LinkIcon } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,8 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiBase } from "@/lib/api";
 import { AuthLayout } from "@/components/layout/AuthLayout";
@@ -36,15 +34,13 @@ export default function ResetStartPage() {
     },
   });
 
-  const method = form.watch("method");
-
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       const response = await fetch(`${apiBase}/api/auth/reset/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ email: data.email, method: "code" }),
       });
       const result = await response.json();
       if (!response.ok) {
@@ -52,16 +48,9 @@ export default function ResetStartPage() {
       }
       toast({
         title: "Check Your Email",
-        description: data.method === "link"
-          ? "We've sent a password reset link to your email."
-          : "We've sent a 6-digit reset code to your email.",
+        description: "We've sent a 6-digit reset code to your email.",
       });
-      if (data.method === "code") {
-        setLocation(`/reset/finish-code?email=${encodeURIComponent(data.email)}`);
-      } else {
-        // If they chose link, they just wait for the email.
-        setLocation(`/login`);
-      }
+      setLocation(`/reset/finish-code?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       toast({
         title: "Error",
@@ -74,7 +63,7 @@ export default function ResetStartPage() {
   };
 
   return (
-    <AuthLayout title="Reset Password" subtitle="Choose how you'd like to reset your password">
+    <AuthLayout title="Reset Password" subtitle="Enter your email to receive a reset code">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
@@ -96,63 +85,6 @@ export default function ResetStartPage() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="method"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Reset Method</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="space-y-3"
-                  >
-                    <div
-                      className={`flex items-center space-x-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                        method === "code"
-                          ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      onClick={() => field.onChange("code")}
-                    >
-                      <RadioGroupItem value="code" id="code" data-testid="radio-code" />
-                      <Mail className="w-5 h-5 text-primary" />
-                      <div className="flex-1">
-                        <Label htmlFor="code" className="text-sm font-medium cursor-pointer">
-                          Send Reset Code
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Receive a 6-digit code via email
-                        </p>
-                      </div>
-                    </div>
-                    <div
-                      className={`flex items-center space-x-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                        method === "link"
-                          ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      onClick={() => field.onChange("link")}
-                    >
-                      <RadioGroupItem value="link" id="link" data-testid="radio-link" />
-                      <LinkIcon className="w-5 h-5 text-primary" />
-                      <div className="flex-1">
-                        <Label htmlFor="link" className="text-sm font-medium cursor-pointer">
-                          Send Reset Link
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Receive a clickable link via email
-                        </p>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Button
             type="submit"
             className="w-full h-12 text-base font-semibold"
@@ -165,7 +97,7 @@ export default function ResetStartPage() {
                 Sending...
               </>
             ) : (
-              method === "code" ? "Send Reset Code" : "Send Reset Link"
+              "Send Reset Code"
             )}
           </Button>
         </form>

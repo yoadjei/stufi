@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { sendOtpEmail, sendPasswordResetCode, sendPasswordResetLink, sendDailyCapAlert, sendCriticalBalanceAlert } from "./email";
+import { sendOtpEmail, sendPasswordResetCode, sendDailyCapAlert, sendCriticalBalanceAlert } from "./email";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -12,7 +12,6 @@ import {
   otpVerifySchema,
   resetStartSchema,
   resetFinishCodeSchema,
-  resetFinishLinkSchema,
   changePasswordSchema,
   updateProfileSchema,
   completeProfileSchema,
@@ -163,19 +162,93 @@ export async function registerRoutes(
     }
   });
 
-  // Auth: Register
-  app.post("/api/auth/register", authLimiter, async (req, res) => {
+  // Auth: Register Start — validate email, create shell user, send OTP
+  app.post("/api/auth/register/start", authLimiter, async (req, res) => {
     try {
-      const data = registerUserSchema.parse(req.body);
+      const { email } = z.object({ email: z.string().email("Invalid email address") }).parse(req.body);
 
-      const existing = await storage.getUserByEmail(data.email);
-      if (existing) {
+      const existing = await storage.getUserByEmail(email);
+      if (existing && existing.passwordHash) {
         return res.status(400).json({ error: { code: "EMAIL_EXISTS", message: "Email already registered" } });
       }
 
+      let user = existing;
+      if (!user) {
+        user = await storage.createUser({ email });
+      }
+
+      const existingOtp = await storage.getLatestOtp(user.id);
+      if (existingOtp) {
+        const lastSent = new Date(existingOtp.lastSentAt);
+        const cooldownEnd = new Date(lastSent.getTime() + OTP_RESEND_COOLDOWN_SECONDS * 1000);
+        if (new Date() < cooldownEnd) {
+          return res.status(429).json({
+            error: { code: "RATE_LIMITED", message: "Please wait before requesting a new code" }
+          });
+        }
+      }
+
+      const otp = generateOTP();
+      const otpHash = await bcrypt.hash(otp, 10);
+      const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
+
+      await storage.deleteOtpsForUser(user.id);
+      await storage.createOtp({
+        userId: user.id,
+        otpHash,
+        expiresAt,
+        lastSentAt: new Date(),
+        attemptsCount: "0",
+      });
+
+      await sendOtpEmail(email, otp);
+      res.json({ success: true, message: "Verification code sent to your email" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: error.errors[0].message } });
+      }
+      console.error("Register start error:", error);
+      res.status(500).json({ error: { code: "SERVER_ERROR", message: "Failed to send code" } });
+    }
+  });
+
+  // Auth: Register — verify OTP, upgrade shell user to full account
+  app.post("/api/auth/register", authLimiter, async (req, res) => {
+    try {
+      const data = registerUserSchema.parse(req.body);
+      const otp = z.string().length(6, "OTP must be 6 digits").parse(req.body.otp);
+
+      const user = await storage.getUserByEmail(data.email);
+      if (!user) {
+        return res.status(400).json({ error: { code: "NOT_FOUND", message: "Please start registration first" } });
+      }
+      if (user.passwordHash) {
+        return res.status(400).json({ error: { code: "EMAIL_EXISTS", message: "Email already registered" } });
+      }
+
+      const otpRecord = await storage.getLatestOtp(user.id);
+      if (!otpRecord) {
+        return res.status(400).json({ error: { code: "INVALID_OTP", message: "Invalid or expired code" } });
+      }
+      if (new Date() > new Date(otpRecord.expiresAt)) {
+        return res.status(400).json({ error: { code: "EXPIRED_OTP", message: "Code has expired" } });
+      }
+
+      const attempts = parseInt(otpRecord.attemptsCount) + 1;
+      if (attempts > OTP_MAX_ATTEMPTS) {
+        return res.status(400).json({ error: { code: "MAX_ATTEMPTS", message: "Too many attempts" } });
+      }
+      await storage.updateOtp(otpRecord.id, { attemptsCount: attempts.toString() });
+
+      const valid = await bcrypt.compare(otp, otpRecord.otpHash);
+      if (!valid) {
+        return res.status(400).json({ error: { code: "INVALID_OTP", message: "Invalid code" } });
+      }
+
+      await storage.deleteOtpsForUser(user.id);
+
       const passwordHash = await bcrypt.hash(data.password, 10);
-      const user = await storage.createUser({
-        email: data.email,
+      await storage.updateUser(user.id, {
         passwordHash,
         name: data.name,
         phone: data.phone,
@@ -183,12 +256,16 @@ export async function registerRoutes(
         level: data.level,
       });
 
-      await storage.createSettings(user.id);
+      const existingSettings = await storage.getSettings(user.id);
+      if (!existingSettings) {
+        await storage.createSettings(user.id);
+      }
       await storage.seedDefaultCategories(user.id);
 
       const token = signAccessToken(user.id);
       const refreshToken = await generateAndStoreRefreshToken(user.id);
-      const { passwordHash: _, ...safeUser } = user;
+      const updatedUser = await storage.getUser(user.id);
+      const { passwordHash: _, ...safeUser } = updatedUser!;
       res.json({ user: safeUser, token, refreshToken });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -444,7 +521,6 @@ export async function registerRoutes(
     try {
       const data = resetStartSchema.parse(req.body);
 
-      // Always return success to prevent email enumeration
       const user = await storage.getUserByEmail(data.email);
       if (!user) {
         return res.json({ success: true, message: "If the email exists, a reset has been sent" });
@@ -460,46 +536,22 @@ export async function registerRoutes(
       }
 
       const expiresAt = new Date(Date.now() + RESET_TTL_MINUTES * 60 * 1000);
-      let tokenHash: string | null = null;
-      let codeHash: string | null = null;
+      const code = generateOTP();
+      const codeHash = await bcrypt.hash(code, 10);
 
-      if (data.method === "link") {
-        const token = generateToken();
-        tokenHash = await bcrypt.hash(token, 10);
-        // Store token and send link
-        await storage.deletePasswordResetsForUser(user.id);
-        await storage.createPasswordReset({
-          userId: user.id,
-          method: data.method,
-          tokenHash,
-          codeHash: null,
-          expiresAt,
-          lastSentAt: new Date(),
-          attemptsCount: "0",
-          usedAt: null,
-        });
-        // Send reset link email
-        const baseUrl = process.env.APP_URL || "http://localhost:5000";
-        const resetUrl = `${baseUrl}/reset/finish-link?token=${token}&email=${encodeURIComponent(data.email)}`;
-        await sendPasswordResetLink(data.email, resetUrl);
-      } else {
-        const code = generateOTP();
-        codeHash = await bcrypt.hash(code, 10);
-        await storage.deletePasswordResetsForUser(user.id);
-        await storage.createPasswordReset({
-          userId: user.id,
-          method: data.method,
-          tokenHash: null,
-          codeHash,
-          expiresAt,
-          lastSentAt: new Date(),
-          attemptsCount: "0",
-          usedAt: null,
-        });
-        // Send reset code email
-        await sendPasswordResetCode(data.email, code);
-      }
+      await storage.deletePasswordResetsForUser(user.id);
+      await storage.createPasswordReset({
+        userId: user.id,
+        method: "code",
+        tokenHash: null,
+        codeHash,
+        expiresAt,
+        lastSentAt: new Date(),
+        attemptsCount: "0",
+        usedAt: null,
+      });
 
+      await sendPasswordResetCode(data.email, code);
       res.json({ success: true, message: "If the email exists, a reset has been sent" });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -513,64 +565,35 @@ export async function registerRoutes(
   // Auth: Reset Finish
   app.post("/api/auth/reset/finish", authLimiter, async (req, res) => {
     try {
-      // Handle both link and code methods
-      const { token, email, code, newPassword } = req.body;
+      const { email, code, newPassword } = req.body;
 
       if (!newPassword || newPassword.length < 8) {
         return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Password must be at least 8 characters" } });
       }
-
-      let user;
-      let resetRecord;
-
-      if (token && email) {
-        // Link method - verify token
-        user = await storage.getUserByEmail(email);
-        if (!user) {
-          return res.status(400).json({ error: { code: "INVALID_TOKEN", message: "Invalid or expired token" } });
-        }
-
-        resetRecord = await storage.getLatestPasswordReset(user.id);
-        if (!resetRecord || !resetRecord.tokenHash) {
-          return res.status(400).json({ error: { code: "INVALID_TOKEN", message: "Invalid or expired token" } });
-        }
-
-        if (new Date() > new Date(resetRecord.expiresAt)) {
-          return res.status(400).json({ error: { code: "EXPIRED_TOKEN", message: "Token has expired" } });
-        }
-
-        const validToken = await bcrypt.compare(token, resetRecord.tokenHash);
-        if (!validToken) {
-          await storage.updatePasswordReset(resetRecord.id, {
-            attemptsCount: (parseInt(resetRecord.attemptsCount) + 1).toString()
-          });
-          return res.status(400).json({ error: { code: "INVALID_TOKEN", message: "Invalid token" } });
-        }
-      } else if (email && code) {
-        // Code method
-        user = await storage.getUserByEmail(email);
-        if (!user) {
-          return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid or expired code" } });
-        }
-
-        resetRecord = await storage.getLatestPasswordReset(user.id);
-        if (!resetRecord || !resetRecord.codeHash) {
-          return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid or expired code" } });
-        }
-
-        if (new Date() > new Date(resetRecord.expiresAt)) {
-          return res.status(400).json({ error: { code: "EXPIRED_CODE", message: "Code has expired" } });
-        }
-
-        const valid = await bcrypt.compare(code, resetRecord.codeHash);
-        if (!valid) {
-          await storage.updatePasswordReset(resetRecord.id, {
-            attemptsCount: (parseInt(resetRecord.attemptsCount) + 1).toString()
-          });
-          return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid code" } });
-        }
-      } else {
+      if (!email || !code) {
         return res.status(400).json({ error: { code: "MISSING_DATA", message: "Missing required fields" } });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid or expired code" } });
+      }
+
+      const resetRecord = await storage.getLatestPasswordReset(user.id);
+      if (!resetRecord || !resetRecord.codeHash) {
+        return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid or expired code" } });
+      }
+
+      if (new Date() > new Date(resetRecord.expiresAt)) {
+        return res.status(400).json({ error: { code: "EXPIRED_CODE", message: "Code has expired" } });
+      }
+
+      const valid = await bcrypt.compare(code, resetRecord.codeHash);
+      if (!valid) {
+        await storage.updatePasswordReset(resetRecord.id, {
+          attemptsCount: (parseInt(resetRecord.attemptsCount) + 1).toString()
+        });
+        return res.status(400).json({ error: { code: "INVALID_CODE", message: "Invalid code" } });
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);

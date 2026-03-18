@@ -16,7 +16,6 @@ import OtpStartPage from "@/pages/otp-start";
 import OtpVerifyPage from "@/pages/otp-verify";
 import ResetStartPage from "@/pages/reset-start";
 import ResetFinishCodePage from "@/pages/reset-finish-code";
-import ResetFinishLinkPage from "@/pages/reset-finish-link";
 import CompleteProfilePage from "@/pages/complete-profile";
 import HomePage from "@/pages/home";
 import CyclesPage from "@/pages/cycles";
@@ -113,9 +112,6 @@ function Router() {
       </Route>
       <Route path="/reset/finish-code">
         <PublicRoute><ResetFinishCodePage /></PublicRoute>
-      </Route>
-      <Route path="/reset/finish-link">
-        <PublicRoute><ResetFinishLinkPage /></PublicRoute>
       </Route>
 
       {/* complete profile (requires auth but allows missing profile) */}
