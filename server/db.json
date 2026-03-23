@@ -1,11 +1,179 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "email": "eniola@gmail.com",
+      "passwordHash": "$2b$10$tvSnsUALJpt8yyzVBFt9GuxOWiVUJ/Dw6nhDpOcWCk6h50FZKfZw.",
+      "name": "Mulika",
+      "role": "user",
+      "createdAt": "2026-03-23T17:37:02.524Z",
+      "updatedAt": "2026-03-23T17:37:02.524Z"
+    }
+  ],
   "authOtps": [],
   "passwordResets": [],
-  "refreshTokens": [],
-  "settings": [],
-  "cycles": [],
-  "categories": [],
+  "refreshTokens": [
+    {
+      "id": "949a7ac2-5fb8-430c-8dce-3f340b1dcc3c",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "token": "xx3h52wec5n7fpw9efq2u3letmwcx0hvsfo7vu5p2oj67409y1hjeqa94bxo2hz5",
+      "expiresAt": "2026-04-22T17:37:02.719Z",
+      "createdAt": "2026-03-23T17:37:02.724Z",
+      "revokedAt": null
+    }
+  ],
+  "settings": [
+    {
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "dailyCapEnabled": false,
+      "dailyCapAmount": null,
+      "hideBalanceDefault": false,
+      "emailAlertsEnabled": true
+    }
+  ],
+  "cycles": [
+    {
+      "id": "c18445bf-f979-44ff-8739-6862318d0460",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "startDate": "2026-03-23",
+      "nextAllowanceDate": "2026-04-23",
+      "startingBalance": "1000",
+      "expectedNextAmount": "1000",
+      "status": "active",
+      "closedAt": null,
+      "createdAt": "2026-03-23T17:37:02.704Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1147e693-9729-4031-84c7-e257d4f24e10",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Food",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "4f19e3be-c0ff-45fa-b273-fe073b7479a8",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Transport",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "93cfdbc4-3eda-478f-b5bc-f0ff2a2f022f",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Data & Airtime",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "2dce0045-c403-4ae4-b391-870351c79a42",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Books & Supplies",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "048fb4ca-0c1c-452c-b264-01d32b7a85c0",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Clothing",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "d3704fc1-a71b-4e42-a876-66807d7edd3c",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Toiletries",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "d0a12680-01d2-4513-aa95-054f0ce59f01",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Entertainment",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "7a5901b7-c04b-48ea-b520-70c0f754c295",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Savings",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "f9242973-e869-4353-883d-c1cdd1fffa19",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Health",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "dd4c01f9-dfcd-46e1-b8de-71ed95423f90",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Gifts",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "92e2a465-c799-4ca5-b2d4-4c00185fa5bd",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Subscriptions",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "ba26392c-706a-446f-a317-a882b1ccf80f",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Other",
+      "kind": "expense",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "2e04681b-8a76-46b6-ab2c-48f154b57c03",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Allowance",
+      "kind": "income",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "cafedf5c-1ffa-48d1-b905-d5677f14c27f",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Gift",
+      "kind": "income",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "f77753a0-dc0a-4109-a6f8-c39bb0dcf12f",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Refund",
+      "kind": "income",
+      "isDefault": true,
+      "archivedAt": null
+    },
+    {
+      "id": "fafb6225-c4f6-463a-998c-37e2b149268b",
+      "userId": "f83b93f0-889a-4af8-a79a-52464be04f70",
+      "name": "Other Income",
+      "kind": "income",
+      "isDefault": true,
+      "archivedAt": null
+    }
+  ],
   "transactions": [],
   "notifications": [],
   "onboardingStories": []
