@@ -105,6 +105,7 @@ export default function AddExpensePage() {
                           <Input
                             type="number"
                             placeholder="0"
+                            min="0"
                             className="pl-16 text-3xl h-16 font-bold"
                             data-testid="input-amount"
                             {...field}
