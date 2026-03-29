@@ -221,9 +221,11 @@ export default function InsightsPage() {
               <Card className="border-0 shadow-sm bg-gray-50">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Your savings increased by:</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {formatCurrency(Math.max(0, totalIncome - totalExpense))}
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {totalIncome - totalExpense >= 0 ? "Net gain this cycle:" : "Net loss this cycle:"}
+                    </p>
+                    <p className={`text-2xl font-bold ${totalIncome - totalExpense >= 0 ? "text-foreground" : "text-red-500"}`}>
+                      {formatCurrency(Math.abs(totalIncome - totalExpense))}
                     </p>
                   </div>
                   <div className="w-16 h-16 flex items-center justify-center">
